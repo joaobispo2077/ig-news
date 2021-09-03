@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React from 'react';
+import { SignInButton } from '../SignInButton';
 // import Image from 'next/image';
 
 import styles from './styles.module.scss';
@@ -14,6 +15,8 @@ export const Header = () => {
           <a className={styles.active}>Home</a>
           <a>Posts</a>
         </nav>
+
+        <SignInButton />
       </div>
     </header>
   );
