@@ -38,7 +38,6 @@ module.exports = {
   rules: {
     'prettier/prettier': 'error',
     '@next/next/no-document-import-in-page': 'off',
-    '@next/next/no-title-in-document-head': 'off',
     'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
