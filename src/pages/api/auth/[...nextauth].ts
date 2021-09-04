@@ -13,7 +13,11 @@ export default NextAuth({
     }),
   ],
   jwt: {
-    signingKey: process.env.SIGNING_KEY,
+    encryption: true,
+    secret: process.env.JWT_SECRET,
+    signingKey:
+      '{"kty":"oct","kid":"Kz8d4zLqjwFJbQIEl3LtXXSuIXepiISm0LwmvofZR08","alg":"HS512","k":"Bi29iqIvWGqjgQND92HyStPNyxEXzKvLy1sVGcDUuMM"}',
+    encryptionKey: process.env.JWT_ENCRYPTION_KEY,
   },
   callbacks: {
     async signIn(user, account, profile) {
