@@ -10,8 +10,8 @@ export const SignInButton = () => {
 
   return session ? (
     <button className={styles.signInButton} type="button">
-      <FaGithub color="#04D361" /> joaobispo2077
-      <FiX color="#737380" />
+      <FaGithub color="#04D361" /> {session.user.name}
+      <FiX color="#737380" onClick={() => signOut()} />
     </button>
   ) : (
     <button
