@@ -6,6 +6,9 @@ import { fauna } from '../../services/fauna';
 import { stripe } from '../../services/stripe';
 
 type User = {
+  data: {
+    stripeCustomerId?: string;
+  };
   ref: {
     id: string;
   };
@@ -17,27 +20,33 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
     if (request.method === 'POST') {
       const session = await getSession({ req: request });
 
-      const stripeCustomer = await stripe.customers.create({
-        email: session.user.email,
-        // metadata: {}
-      });
-
       const { Get, Match, Index, Casefold } = query;
       const user = await fauna.query<User>(
-        Get(Match(Index('users_by_email'), Casefold(session.user.email))),
+        Get(Match(Index('user_by_email'), Casefold(session.user.email))),
       );
 
-      const { Update, Ref, Collection } = query;
-      await fauna.query(
-        Update(Ref(Collection('users'), user.ref.id), {
-          data: {
-            stripeCustomerId: stripeCustomer.id,
-          },
-        }),
-      );
+      let stripeCustomerId = user.data.stripeCustomerId;
+
+      if (!stripeCustomerId) {
+        const stripeCustomer = await stripe.customers.create({
+          email: session.user.email,
+          // metadata: {}
+        });
+
+        const { Update, Ref, Collection } = query;
+        await fauna.query(
+          Update(Ref(Collection('users'), user.ref.id), {
+            data: {
+              stripeCustomerId: stripeCustomer.id,
+            },
+          }),
+        );
+
+        stripeCustomerId = stripeCustomer.id;
+      }
 
       const stripeCheckouSession = await stripe.checkout.sessions.create({
-        customer: stripeCustomer.id,
+        customer: stripeCustomerId,
         payment_method_types: ['card'],
         billing_address_collection: 'required',
         line_items: [
