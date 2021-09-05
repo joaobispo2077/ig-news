@@ -1,3 +1,4 @@
+/* eslint-disable no-case-declarations */
 /* eslint-disable import/no-anonymous-default-export */
 import { NextApiRequest, NextApiResponse } from 'next-auth/internals/utils';
 import { Readable } from 'stream';
@@ -21,7 +22,12 @@ async function buffering(readable: Readable) {
   return Buffer.concat(chunks);
 }
 
-const relevantEvents = new Set(['checkout.session.completed']);
+const relevantEvents = new Set([
+  'checkout.session.completed',
+  'customer.subscription.updated',
+  'customer.subscription.deleted',
+]);
+
 export default async function (
   request: NextApiRequest,
   response: NextApiResponse,
@@ -47,6 +53,15 @@ export default async function (
     if (relevantEvents.has(type)) {
       try {
         switch (type) {
+          case 'customer.subscription.updated':
+          case 'customer.subscription.deleted':
+            const subscription = event.data.object as Stripe.Subscription;
+
+            await saveSubscription(
+              subscription.id,
+              subscription.customer.toString(),
+            );
+            break;
           case 'checkout.session.completed':
             {
               const checkkouSession = event.data
@@ -55,6 +70,7 @@ export default async function (
               await saveSubscription(
                 checkkouSession.subscription.toString(),
                 checkkouSession.customer.toString(),
+                true,
               );
             }
             break;
