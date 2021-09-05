@@ -1,8 +1,15 @@
+import { query } from 'faunadb';
 import { NextApiRequest } from 'next';
 import { getSession } from 'next-auth/client';
 import { NextApiResponse } from 'next-auth/internals/utils';
+import { fauna } from '../../services/fauna';
 import { stripe } from '../../services/stripe';
 
+type User = {
+  ref: {
+    id: string;
+  };
+};
 /* eslint-disable import/no-anonymous-default-export */
 export default async (request: NextApiRequest, response: NextApiResponse) => {
   console.info('running subscription');
@@ -14,6 +21,20 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
         email: session.user.email,
         // metadata: {}
       });
+
+      const { Get, Match, Index, Casefold } = query;
+      const user = await fauna.query<User>(
+        Get(Match(Index('users_by_email'), Casefold(session.user.email))),
+      );
+
+      const { Update, Ref, Collection } = query;
+      await fauna.query(
+        Update(Ref(Collection('users'), user.ref.id), {
+          data: {
+            stripeCustomerId: stripeCustomer.id,
+          },
+        }),
+      );
 
       const stripeCheckouSession = await stripe.checkout.sessions.create({
         customer: stripeCustomer.id,
