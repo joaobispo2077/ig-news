@@ -20,6 +20,32 @@ export default NextAuth({
     encryptionKey: process.env.JWT_ENCRYPTION_KEY,
   },
   callbacks: {
+    async session(session) {
+      try {
+        const { Get, Match, Index, Select, Casefold, Intersection } = query;
+        const userActiveSubscription = await fauna.query(
+          Get(
+            Intersection([
+              Match(
+                Index('subscription_by_user_ref'),
+                Select(
+                  'ref',
+                  Get(
+                    Match(Index('user_by_email'), Casefold(session.user.email)),
+                  ),
+                ),
+              ),
+              Match(Index('subscription_by_status'), 'active'),
+            ]),
+          ),
+        );
+
+        return { ...session, activeSubscription: userActiveSubscription };
+      } catch (e) {
+        console.log(e);
+        return { ...session, activeSubscription: null };
+      }
+    },
     async signIn(user, account, profile) {
       const { email } = user;
 
