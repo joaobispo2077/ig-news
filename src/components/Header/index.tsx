@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React from 'react';
 import { SignInButton } from '../SignInButton';
+import Link from 'next/link';
 // import Image from 'next/image';
 
 import styles from './styles.module.scss';
