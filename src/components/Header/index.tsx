@@ -1,24 +1,27 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React from 'react';
 import { SignInButton } from '../SignInButton';
-import Link from 'next/link';
+import { ActiveLink } from '../ActiveLink';
+import { useRouter } from 'next/router';
 // import Image from 'next/image';
 
 import styles from './styles.module.scss';
 
 export const Header = () => {
+  const { asPath } = useRouter();
+
   return (
     <header className={styles.headerContainer}>
       <div className={styles.headerContent}>
         <img src="/images/logo.svg" alt="ig.news" />
 
         <nav>
-          <Link href="/">
-            <a className={styles.active}>Home</a>
-          </Link>
-          <Link href="/posts" prefetch>
+          <ActiveLink href="/" activeClassName={styles.active}>
+            <a>Home</a>
+          </ActiveLink>
+          <ActiveLink href="/posts" prefetch activeClassName={styles.active}>
             <a>Posts</a>
-          </Link>
+          </ActiveLink>
         </nav>
 
         <SignInButton />
