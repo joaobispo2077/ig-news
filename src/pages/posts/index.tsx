@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import { GetStaticProps } from 'next';
 import Prismic from '@prismicio/client';
 import { RichText } from 'prismic-dom';
@@ -27,8 +28,8 @@ export default function Posts({ posts }: PostsProps) {
       <main className={styles.container}>
         <div className={styles.posts}>
           {posts.map((post) => (
-            <Link key={post.slug} href={`/posts/${post.slug}`}>
-              <a href="#a">
+            <Link key={post.slug} href={`/posts/preview/${post.slug}`}>
+              <a>
                 <time>{post.updatedAt}</time>
                 <strong> {post.title}</strong>
                 <p>{post.excerpt}...</p>

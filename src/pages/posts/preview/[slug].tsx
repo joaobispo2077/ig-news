@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import Head from 'next/head';
 import Link from 'next/link';
-import { GetStaticProps } from 'next';
+import { GetStaticPaths, GetStaticProps } from 'next';
 import { RichText } from 'prismic-dom';
 import { getPrismicClient } from '../../../services/prismic';
 
@@ -62,7 +62,17 @@ export default function PostPreview({ post }: PostProps) {
   );
 }
 
-export const getStaticPaths = () => {
+export const getStaticPaths: GetStaticPaths = async () => {
+  // paths: [] when is empty load static page in the first access (runtime moment)
+  //  paths: [
+  //    { params: { slug: '5-das-licoes-que-aprendi-em-1-mes-estagiando-como-desenvolvedor-fullstack-em-uma-tech-startup' }
+  //  ] when exists some post, generate page in the build moment
+  /* fallback
+      true => try to generate page
+      false => return 404 if static page doesnt exists
+      blocking => when content there is not generated try load page with SSR
+  */
+
   return {
     paths: [],
     fallback: 'blocking',
@@ -94,5 +104,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     props: {
       post,
     },
+    revalidate: 60 * 30, // minutes
   };
 };
