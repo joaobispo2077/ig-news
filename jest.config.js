@@ -1,6 +1,6 @@
 module.exports = {
-  testIgnorePatterns: ['/node_modules/', '/dist/', '/.next/'],
-  setupFilesAFterEnv: ['<rootDir>/setupTests.ts'],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/.next/'],
+  setupFilesAfterEnv: ['<rootDir>/tests/setupTests.ts'],
   testEnvironment: 'jsdom',
   transform: {
     '^.+\\.(t|j)sx?$': [
