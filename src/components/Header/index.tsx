@@ -2,18 +2,20 @@
 import React from 'react';
 import { SignInButton } from '../SignInButton';
 import { ActiveLink } from '../ActiveLink';
-import { useRouter } from 'next/router';
-// import Image from 'next/image';
 
 import styles from './styles.module.scss';
+import { useSession } from 'next-auth/client';
 
 export const Header = () => {
-  const { asPath } = useRouter();
+  const [session] = useSession();
 
   return (
     <header className={styles.headerContainer}>
       <div className={styles.headerContent}>
-        <img src="/images/logo.svg" alt="ig.news" />
+        <img
+          src={session ? `/images/logo_active.svg` : `/images/logo.svg`}
+          alt="ig.news"
+        />
 
         <nav>
           <ActiveLink href="/" activeClassName={styles.active}>
