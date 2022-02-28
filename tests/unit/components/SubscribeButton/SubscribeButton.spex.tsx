@@ -14,7 +14,7 @@ describe('<SubscribeButton />', () => {
     useSessionMocked.mockReturnValueOnce([null, false]);
 
     const signInMocked = jest.mocked(signIn);
-    signInMocked.mockReturnValueOnce(Promise.resolve());
+    signInMocked.mockReturnValueOnce(jest.fn());
 
     const { getByText } = render(<SubscribeButton priceId="abc" />);
 
@@ -34,19 +34,18 @@ describe('<SubscribeButton />', () => {
     ]);
 
     const useRouterMocked = jest.mocked<() => NextRouter>(useRouter);
-    const pushMocked = jest.mocked(
-      jest.fn((value: string) => Promise.resolve(value)),
-    );
+    const pushMock = jest.fn();
 
     useRouterMocked.mockReturnValueOnce({
-      route: {
-        push: pushMocked,
-      },
-    });
+      push: pushMock,
+    } as unknown as NextRouter);
 
     const { getByText } = render(<SubscribeButton priceId="abc" />);
 
-    expect(getByText('John Doe')).toBeInTheDocument();
+    const button = getByText('Subscribe now');
+    fireEvent.click(button);
+
+    expect(pushMock).toHaveBeenCalledWith('/posts');
   });
 
   // it('should be able to calls redirectToCheckout logged in user and without subscription', () => {
