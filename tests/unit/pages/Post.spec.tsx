@@ -8,29 +8,26 @@ const post = {
   slug: 'mock-article',
   title: 'Mock title',
   content: '<p>Mock content</p>',
-  updatedAt: 'March 1, 2020',
+  updatedAt: '01 de abril de 2022',
 };
 
-const mockPrismicPosts = [
-  {
-    uid: 'mock-article',
-    data: {
-      title: [
-        {
-          type: 'heading',
-          text: 'Mock title',
-        },
-      ],
-      content: [
-        {
-          type: 'paragraph',
-          text: 'Mock excerpt',
-        },
-      ],
-    },
-    last_publication_date: '04-01-2022',
+const mockPrismicPost = {
+  last_publication_date: '04-01-2022',
+  data: {
+    title: [
+      {
+        type: 'heading',
+        text: 'Mock title',
+      },
+    ],
+    content: [
+      {
+        type: 'paragraph',
+        text: 'Mock content',
+      },
+    ],
   },
-];
+};
 
 jest.mock('../../../src/services/prismic');
 
@@ -48,7 +45,7 @@ describe('<Posts />', () => {
   it('should be able to redirect an user that has no subscription', async () => {
     const getSessionMocked = jest.mocked(getSession);
     getSessionMocked.mockResolvedValue({
-      activeSubscription: false,
+      activeSubscription: null,
     });
 
     const response = await getServerSideProps({
@@ -70,29 +67,32 @@ describe('<Posts />', () => {
     );
   });
 
-  // it('should loads initial data', async () => {
-  //   const getPrismicClientMocked = jest.mocked(getPrismicClient);
-  //   getPrismicClientMocked.mockReturnValueOnce({
-  //     query: jest.fn().mockResolvedValueOnce({
-  //       results: mockPrismicPosts,
-  //     }),
-  //   } as unknown as DefaultClient);
+  it('should be able to returns post when user has an active subscription', async () => {
+    const getSessionMocked = jest.mocked(getSession);
+    getSessionMocked.mockResolvedValue({
+      activeSubscription: 'fake-active-subscription',
+    });
 
-  //   const response = await getStaticProps({});
+    const getPrismicClientMocked = jest.mocked(getPrismicClient);
+    getPrismicClientMocked.mockReturnValueOnce({
+      getByUID: jest.fn().mockResolvedValueOnce(mockPrismicPost),
+    } as unknown as DefaultClient);
 
-  //   expect(response).toEqual(
-  //     expect.objectContaining({
-  //       props: {
-  //         posts: [
-  //           {
-  //             slug: 'mock-article',
-  //             title: 'Mock title',
-  //             excerpt: 'Mock excerpt',
-  //             updatedAt: '01 de abril de 2022',
-  //           },
-  //         ],
-  //       },
-  //     }),
-  //   );
-  // });
+    const response = await getServerSideProps({
+      req: {
+        cookies: null,
+      },
+      params: {
+        slug: 'mock-article',
+      },
+    } as any);
+
+    expect(response).toEqual(
+      expect.objectContaining({
+        props: {
+          post,
+        },
+      }),
+    );
+  });
 });
