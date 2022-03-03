@@ -2,6 +2,7 @@ import { DefaultClient } from '@prismicio/client/types/client';
 import { render } from '@testing-library/react';
 import Post, { getServerSideProps } from '../../../src/pages/posts/[slug]';
 import { getPrismicClient } from '../../../src/services/prismic';
+import { getSession } from 'next-auth/client';
 
 const post = {
   slug: 'mock-article',
@@ -34,6 +35,7 @@ const mockPrismicPosts = [
 jest.mock('../../../src/services/prismic');
 
 jest.mock('@prismicio/client');
+jest.mock('next-auth/client');
 
 describe('<Posts />', () => {
   it('should renders correctly', () => {
@@ -41,6 +43,31 @@ describe('<Posts />', () => {
 
     expect(getByText('Mock title')).toBeInTheDocument();
     expect(getByText('Mock content')).toBeInTheDocument();
+  });
+
+  it('should be able to redirect an user that has no subscription', async () => {
+    const getSessionMocked = jest.mocked(getSession);
+    getSessionMocked.mockResolvedValue({
+      activeSubscription: false,
+    });
+
+    const response = await getServerSideProps({
+      req: {
+        cookies: null,
+      },
+      params: {
+        slug: 'mock-article',
+      },
+    } as any);
+
+    expect(response).toEqual(
+      expect.objectContaining({
+        redirect: {
+          destination: '/',
+          permanent: false,
+        },
+      }),
+    );
   });
 
   // it('should loads initial data', async () => {
