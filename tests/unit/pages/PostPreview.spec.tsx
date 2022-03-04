@@ -4,7 +4,7 @@ import PostPreview, {
   getStaticProps,
 } from '../../../src/pages/posts/preview/[slug]';
 import { getPrismicClient } from '../../../src/services/prismic';
-import { getSession, useSession } from 'next-auth/client';
+import { useSession } from 'next-auth/client';
 import { useRouter } from 'next/router';
 
 const post = {
@@ -71,57 +71,24 @@ describe('<PostPreview />', () => {
     expect(pushMocked).toHaveBeenCalledWith(`/posts/${post.slug}`);
   });
 
-  // it('should be able to redirect an user to real post when has a subscription', async () => {
-  //   const getSessionMocked = jest.mocked(getSession);
-  //   getSessionMocked.mockResolvedValue({
-  //     activeSubscription: true,
-  //   });
+  it('should be able to load initial data', async () => {
+    const getPrismicClientMocked = jest.mocked(getPrismicClient);
+    getPrismicClientMocked.mockReturnValueOnce({
+      getByUID: jest.fn().mockResolvedValueOnce(mockPrismicPost),
+    } as unknown as DefaultClient);
 
-  //   const response = await getServerSideProps({
-  //     req: {
-  //       cookies: null,
-  //     },
-  //     params: {
-  //       slug: 'mock-article',
-  //     },
-  //   } as any);
+    const response = await getStaticProps({
+      params: {
+        slug: post.slug,
+      },
+    } as any);
 
-  //   expect(response).toEqual(
-  //     expect.objectContaining({
-  //       redirect: {
-  //         destination: '/',
-  //         permanent: false,
-  //       },
-  //     }),
-  //   );
-  // });
-
-  // it('should be able to returns post when user has an active subscription', async () => {
-  //   const getSessionMocked = jest.mocked(getSession);
-  //   getSessionMocked.mockResolvedValue({
-  //     activeSubscription: 'fake-active-subscription',
-  //   });
-
-  //   const getPrismicClientMocked = jest.mocked(getPrismicClient);
-  //   getPrismicClientMocked.mockReturnValueOnce({
-  //     getByUID: jest.fn().mockResolvedValueOnce(mockPrismicPost),
-  //   } as unknown as DefaultClient);
-
-  //   const response = await getServerSideProps({
-  //     req: {
-  //       cookies: null,
-  //     },
-  //     params: {
-  //       slug: 'mock-article',
-  //     },
-  //   } as any);
-
-  //   expect(response).toEqual(
-  //     expect.objectContaining({
-  //       props: {
-  //         post,
-  //       },
-  //     }),
-  //   );
-  // });
+    expect(response).toEqual(
+      expect.objectContaining({
+        props: {
+          post,
+        },
+      }),
+    );
+  });
 });
