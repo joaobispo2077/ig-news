@@ -5,6 +5,7 @@ import PostPreview, {
 } from '../../../src/pages/posts/preview/[slug]';
 import { getPrismicClient } from '../../../src/services/prismic';
 import { getSession, useSession } from 'next-auth/client';
+import { useRouter } from 'next/router';
 
 const post = {
   slug: 'mock-article',
@@ -35,6 +36,7 @@ jest.mock('../../../src/services/prismic');
 
 jest.mock('@prismicio/client');
 jest.mock('next-auth/client');
+jest.mock('next/router');
 
 describe('<PostPreview />', () => {
   it('should renders correctly', () => {
@@ -48,10 +50,31 @@ describe('<PostPreview />', () => {
     expect(getByText('Wanna continue reading?')).toBeInTheDocument();
   });
 
-  // it('should be able to redirect an user that has no subscription', async () => {
+  it('should be able to redirect an user to real post when has a subscription', async () => {
+    const useSessionMocked = jest.mocked(useSession);
+    useSessionMocked.mockReturnValue([
+      {
+        activeSubscription: 'fake-active-subscription',
+      },
+      false,
+    ] as any);
+
+    const useRouterMocked = jest.mocked(useRouter);
+    const pushMocked = jest.fn();
+
+    useRouterMocked.mockReturnValue({
+      push: pushMocked,
+    } as any);
+
+    render(<PostPreview post={post} />);
+
+    expect(pushMocked).toHaveBeenCalledWith(`/posts/${post.slug}`);
+  });
+
+  // it('should be able to redirect an user to real post when has a subscription', async () => {
   //   const getSessionMocked = jest.mocked(getSession);
   //   getSessionMocked.mockResolvedValue({
-  //     activeSubscription: null,
+  //     activeSubscription: true,
   //   });
 
   //   const response = await getServerSideProps({
