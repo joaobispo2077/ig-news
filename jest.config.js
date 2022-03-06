@@ -1,4 +1,9 @@
 module.exports = {
+  collectCoverageFrom: [
+    'src/**/*.tsx',
+    '!src/**/_app.tsx',
+    '!src/**/_document.tsx',
+  ],
   testPathIgnorePatterns: ['/node_modules/', '/dist/', '/.next/'],
   setupFilesAfterEnv: ['<rootDir>/tests/setupTests.ts'],
   testEnvironment: 'jsdom',
